@@ -17,14 +17,14 @@ app.use( hostname( 'admin.tardis.localhost', admin ) )
 app.use( '/team', teams )
 
 // For initializing a chat for a customer
-app.use( '/chat', chat )
+app.use( '/open', chat )
 
 let server = http.createServer( app )
 
 chatServer( server )
 
 if ( process.env.NODE_ENV === 'development' ) {
-	app.use( '/client', withTeam( require( './dev' ).middleware ) )
+	app.use( '/chat', withTeam( require( './dev' ).middleware ) )
 	app.use( '/hud', withTeam( require( './hud' ).middleware ) )
 }
 

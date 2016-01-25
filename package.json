@@ -1,7 +1,7 @@
 {
   "name": "tardis",
   "version": "1.0.0",
-  "description": "",
+  "description": "Real-time chat support",
   "main": "index.js",
   "scripts": {
     "start": "babel-node index.js",
