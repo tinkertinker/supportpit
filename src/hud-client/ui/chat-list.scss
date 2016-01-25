@@ -1,0 +1,14 @@
+body {
+	margin: 0;
+}
+
+.chat-list-item {
+	display: flex;
+	padding: 8px;
+
+	> img {
+		max-width: 32px;
+		border-radius: 32px;
+		margin-right: 8px;
+	}
+}
