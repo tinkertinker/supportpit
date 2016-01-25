@@ -34,7 +34,7 @@ export class Hud extends Component {
 		const { id } = chat
 		let message = this.props.editing[id] || ''
 		let canSend = message && message !== ''
-		let pending = this.props.pending[id] || []			
+		let pending = this.props.pending[id] || []
 		return (
 			<div className="panel" key={i}>
 				<Chat
