@@ -1,6 +1,8 @@
 import Team from './team'
 import api from './api'
 import express from 'express'
+import logger from 'debug'
+const debug = logger( 'tardis.teams' )
 
 let TEAMS = [
 	new Team( 'a8c', 'http://localhost:4004/tardis' )
@@ -9,6 +11,7 @@ let TEAMS = [
 export { Team }
 
 export function forHost( host, cb ) {
+	debug( 'looking for team matching host:', host )
 	process.nextTick( () => {
 		let team = TEAMS.find( ( t ) => host === t.host )
 		let error = null

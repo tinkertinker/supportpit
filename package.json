@@ -4,13 +4,15 @@
   "description": "Real-time chat support",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "DEBUG=tardis.* babel-node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+		"postinstall": "./scripts/install.sh"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "babel": "^6.3.26",
+    "babel-cli": "^6.4.5",
     "babel-preset-es2015": "^6.3.13",
     "body-parser": "^1.14.2",
     "classnames": "^2.2.3",
@@ -24,11 +26,8 @@
     "redux-logger": "^2.4.0",
     "redux-thunk": "^1.0.3",
     "socketio": "^1.0.0",
-    "uuid": "^2.0.1"
-  },
-  "devDependencies": {
+    "uuid": "^2.0.1",
     "autoprefixer": "^6.3.1",
-    "babel-cli": "^6.4.5",
     "babel-eslint": "^4.1.6",
     "babel-loader": "^6.2.1",
     "babel-preset-react": "^6.3.13",

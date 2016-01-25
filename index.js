@@ -1,4 +1,4 @@
-import express from 'express'
+import express, { static as serveStatic } from 'express'
 import http from 'http'
 import debug from 'debug'
 import hostname from './src/hostname'
@@ -26,6 +26,9 @@ chatServer( server )
 if ( process.env.NODE_ENV === 'development' ) {
 	app.use( '/chat', withTeam( require( './dev' ).middleware ) )
 	app.use( '/hud', withTeam( require( './hud' ).middleware ) )
+} else {
+	app.use( '/chat', withTeam( serveStatic( './dist/chat' ) ) )
+	app.use( '/hud', withTeam( serveStatic( './dist/hud' ) ) )
 }
 
 server.listen( process.env.PORT || 3000, () => {
