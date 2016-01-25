@@ -1,5 +1,6 @@
 import socket from './socket'
 import logger from 'debug'
+import { v4 as uuid } from 'uuid'
 const debug = logger( 'tardis.actions' )
 
 export const OPEN_REQUEST = 'OPEN_REQUEST'
@@ -20,8 +21,10 @@ export function closeRequest( user, id ) {
 
 export const JOIN_CHAT = 'JOIN_CHAT'
 export function joinChat( chat ) {
+	console.warn( 'join chat', chat )
 	return ( dispatch ) => {
 		socket.emit( 'join-chat', chat.id, ( user ) => {
+			console.warn( 'open chat', chat )
 			dispatch( openChat( chat ) )
 		} )
 	}
@@ -49,4 +52,39 @@ export function receiveAction( action ) {
 		type: RECEIVE_ACTION,
 		action, id: action.chat_id
 	}
+}
+
+export const EDIT_MESSAGE = 'EDIT_MESSAGE'
+export function updateChatMessage( chat, message ) {
+	return { type: EDIT_MESSAGE, chat, message }
+}
+
+export const CLEAR_MESSAGE = 'CLEAR_MESSAGE'
+export function clearChatMessage( chat ) {
+	return { type: CLEAR_MESSAGE, chat }
+}
+
+export const SEND_MESAGE = 'SEND_MESSAGE'
+export function sendChatMessage( chat, message ) {
+	return ( dispatch ) => {
+		const id = uuid()
+		const action = { message, id, type: 'message', timestamp: now(), chat_id: chat.id }
+		dispatch( clearChatMessage( chat ) )
+		// dispatch( sentChatMessage( chat, action ) )
+		socket.emit( 'action', chat.id, action, () => {
+			debug( 'confirmed message', action )
+		} )
+	}
+}
+
+export const SET_USER = 'SET_USER'
+export function setUser( user ) {
+	return {
+		type: SET_USER,
+		user
+	}
+}
+
+function now() {
+	return ( new Date() ).getTime()
 }

@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 import Hud from './ui/hud'
 import configureStore from './configureStore'
 import logger from 'debug'
-import { openRequest, closeRequest, receiveAction } from './actions'
+import { openRequest, closeRequest, receiveAction, setUser } from './actions'
 import socket from './socket'
 
 const debug = logger( 'tardis.hud' )
@@ -30,6 +30,10 @@ socket.on( 'close-request', ( chat, id ) => {
 socket.on( 'action', ( action ) => {
 	debug( 'Received action', action )
 	store.dispatch( receiveAction( action ) )
+} )
+
+socket.on( 'authorized', ( user ) => {
+	store.dispatch( setUser( user ) )
 } )
 
 render(

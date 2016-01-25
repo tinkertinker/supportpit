@@ -5,6 +5,11 @@ body {
 .chat-list-item {
 	display: flex;
 	padding: 8px;
+	border-bottom: 1px solid hsla( 0, 0, 80%, 1.0 );
+
+	&:hover {
+		background: hsla( 0, 0, 95%, 1.0 );
+	}
 
 	> img {
 		max-width: 32px;

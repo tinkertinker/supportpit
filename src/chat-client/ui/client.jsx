@@ -30,7 +30,7 @@ export class Client extends React.Component {
 	isRemoteMessage( action ) {
 		debug( 'action is remote?', action )
 		const { user } = this.props
-		if ( user && action.user.token === user.token ) {
+		if ( user && action.user && action.user.token === user.token ) {
 			return false
 		}
 		return true
@@ -39,9 +39,8 @@ export class Client extends React.Component {
 	authorized( isAuthed, notAuthed ) {
 		if ( this.props.authorization === 'requested' ) {
 			return notAuthed()
-		} else {
-			return isAuthed()
 		}
+		return isAuthed()
 	}
 
 	updateNickname( e ) {

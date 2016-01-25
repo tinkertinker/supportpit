@@ -8,7 +8,8 @@
 	},
 	"ecmaFeatures": {
 		"modules": true,
-		"experimentalObjectRestSpread": true
+		"experimentalObjectRestSpread": true,
+		"jsx": true
 	},
 	"rules": {
 		"brace-style": [ 1, "1tbs" ],
@@ -73,5 +74,6 @@
 		// Common top-of-file requires, expressions between external, interal
 		"vars-on-top": 1,
 		"yoda": 0
-	}
+	},
+	"plugins": [ "react" ]
 }

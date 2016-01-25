@@ -68,7 +68,7 @@ export default function( server ) {
 			socket.emit( 'team', team )
 			getUser( token, team )
 			.then( onUser )
-			.catch( (e) => {
+			.catch( ( e ) => {
 				debug( 'User not found', e )
 				socket.emit( 'identify' )
 				socket.on( 'identify', ( name ) => {
@@ -83,7 +83,8 @@ export default function( server ) {
 	io.on( 'connection', ( socket ) => {
 		// If the user is an agent add the to the agent room
 		// TODO: authenticate agent
-		let user = { picture: 'http://1.gravatar.com/avatar/767fc9c115a1b989744c755db47feb60?s=200&r=pg&d=mm', name: 'Douglas Adams' }
+		let user = { picture: 'http://1.gravatar.com/avatar/767fc9c115a1b989744c755db47feb60?s=200&r=pg&d=mm', name: 'Douglas Adams', id: 'sample' }
+		socket.emit( 'authorized', user )
 		socket.on( 'join-chat', ( id, fn ) => {
 			let chat = queue.join( socket, id, fn )
 
@@ -101,8 +102,11 @@ export default function( server ) {
 				io.to( id ).emit( 'action', action )
 			} )
 
-			socket.on( 'action', ( chatId, action, fn ) => {
-				debug( 'send message to correct chat', chatId, action )
+			socket.on( 'action', ( chatId, action, complete ) => {
+				let outbound = Object.assign( {}, action, {user} )
+				io.of( '/chat' ).to( chatId ).emit( 'action', outbound )
+				io.to( chatId ).emit( 'action', outbound )
+				complete()
 			} )
 		} )
 	} )

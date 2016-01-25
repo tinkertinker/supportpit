@@ -17,8 +17,11 @@ export default class ChatList extends Component {
 
 	render() {
 		return (
-			<div className="chat-list">
-			{ this.props.chats.map( this.renderChatItem.bind( this ) ) }
+			<div>
+				<div className="title-bar">Open Chats</div>
+				<div className="chat-list">
+				{ this.props.chats.map( this.renderChatItem.bind( this ) ) }
+				</div>
 			</div>
 		)
 	}
