@@ -73,7 +73,14 @@ export class Client extends React.Component {
 	renderIdentify() {
 		return (
 			<div className="identify-form">
-				<input type="text" value={ this.props.nickname } onChange={ this.updateNickname.bind( this ) } placeholder="Name" />
+				<input
+					type="text"
+					value={ this.props.nickname }
+					onChange={ this.updateNickname.bind( this ) }
+					onKeyDown={ ( e ) => {
+						if ( e.which === 13 ) this.sendNickname()
+					} }
+					placeholder="Name" />
 				<input type="button" value="Start" onClick={ this.sendNickname.bind( this ) } disabled={ this.props.nickname === '' } />
 			</div>
 		)
