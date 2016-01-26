@@ -30,7 +30,7 @@ export class Client extends React.Component {
 	isRemoteMessage( action ) {
 		debug( 'action is remote?', action )
 		const { user } = this.props
-		if ( user && action.user && action.user.token === user.token ) {
+		if ( user && action.user && action.user.id === user.id ) {
 			return false
 		}
 		return true
