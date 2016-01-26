@@ -6,10 +6,7 @@ body {
 	display: flex;
 	padding: 8px;
 	border-bottom: 1px solid hsla( 0, 0, 80%, 1.0 );
-
-	&:hover {
-		background: hsla( 0, 0, 95%, 1.0 );
-	}
+	user-select: none;
 
 	> img {
 		max-width: 32px;
@@ -17,4 +14,37 @@ body {
 		margin-right: 8px;
 		align-self: center;
 	}
+
+	.chat-details {
+		flex: 1 1 auto;
+	}
+}
+
+.open-chat-button {
+	align-self: center;
+	flex: 0 0 auto;
+	min-width: 24px;
+	line-height: 24px;
+	height: 24px;
+	background: hsla( 0, 0, 70%, 1.0 );
+	border-radius: 24px;
+	padding: 0 8px;
+	box-sizing: border-box;
+	color: #FFF;
+
+	&:after {
+		content: 'open';
+	}
+
+	&:hover {
+		background: hsla(160, 50%, 50%, 1.0 );
+	}
+
+	.open &:hover {
+		background: hsla( 0, 50%, 50%, 1.0);
+	}
+	.open &:after {
+		content: 'close';
+	}
+
 }

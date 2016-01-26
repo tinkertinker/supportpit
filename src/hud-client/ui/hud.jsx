@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { connect, Provider } from 'react-redux'
 import ChatList from './chat-list'
 import Chat from '../../chat-client/ui/chat'
-import { joinChat, updateChatMessage, sendChatMessage } from '../actions'
+import { joinChat, updateChatMessage, sendChatMessage, leaveChat } from '../actions'
 import log from 'debug'
 
 const debug = log( 'tardis.hud' )
@@ -18,6 +18,10 @@ export class Hud extends Component {
 
 	openChat( chat ) {
 		this.props.dispatch( joinChat( chat ) )
+	}
+
+	closeChat( chat ) {
+		this.props.dispatch( leaveChat( chat ) )
 	}
 
 	updateMessage( chat, message ) {
@@ -84,10 +88,15 @@ export class Hud extends Component {
 	render() {
 		this.notifyNewChats( this.props.availableChats )
 		this.notifyNewMessages( this.props.chats )
+		const openChatIDS = this.props.chats.map( ( c ) => c.id )
 		return (
 			<div className="hud">
 				<div className="queue-list">
-					<ChatList chats={this.props.availableChats} onOpenChat={this.openChat.bind( this )} />
+					<ChatList
+						chats={this.props.availableChats}
+						open={ openChatIDS }
+						onOpenChat={this.openChat.bind( this )}
+						onCloseChat={this.closeChat.bind( this )} />
 				</div>
 				<div className="chat-panels">
 					{ this.props.chats.map( this.renderChatPanel.bind( this ) ) }

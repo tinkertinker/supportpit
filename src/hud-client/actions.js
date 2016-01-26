@@ -24,8 +24,17 @@ export function joinChat( chat ) {
 	console.warn( 'join chat', chat )
 	return ( dispatch ) => {
 		socket.emit( 'join-chat', chat.id, () => {
-			console.warn( 'open chat', chat )
+			debug( 'open chat', chat )
 			dispatch( openChat( chat ) )
+		} )
+	}
+}
+
+export const LEAVE_CHAT = 'LEAVE_CHAT'
+export function leaveChat( chat ) {
+	return ( dispatch ) => {
+		socket.emit( 'leave-chat', chat.id, () => {
+			debug( 'leave chat', chat )
 		} )
 	}
 }
