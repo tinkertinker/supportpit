@@ -8,7 +8,7 @@ import teams, { withTeam } from './src/teams'
 import chatServer from './src/chat-server'
 
 const log = debug( 'tardis.server' )
-const environment = process.NODE_ENV || 'development'
+const environment = process.env.NODE_ENV || 'development'
 
 log( 'Starting tardis in:', environment )
 
