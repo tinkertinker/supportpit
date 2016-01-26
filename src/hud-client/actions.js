@@ -4,18 +4,18 @@ import { v4 as uuid } from 'uuid'
 const debug = logger( 'tardis.actions' )
 
 export const OPEN_REQUEST = 'OPEN_REQUEST'
-export function openRequest( user, id ) {
+export function openRequest( chat ) {
 	return {
 		type: OPEN_REQUEST,
-		user, id
+		chat: chat
 	}
 }
 
 export const CLOSE_REQUEST = 'CLOSE_REQUEST'
-export function closeRequest( user, id ) {
+export function closeRequest( chat ) {
 	return {
 		type: CLOSE_REQUEST,
-		user, id
+		chat: chat
 	}
 }
 
@@ -23,7 +23,7 @@ export const JOIN_CHAT = 'JOIN_CHAT'
 export function joinChat( chat ) {
 	console.warn( 'join chat', chat )
 	return ( dispatch ) => {
-		socket.emit( 'join-chat', chat.id, ( user ) => {
+		socket.emit( 'join-chat', chat.id, () => {
 			console.warn( 'open chat', chat )
 			dispatch( openChat( chat ) )
 		} )
@@ -83,6 +83,22 @@ export function setUser( user ) {
 		type: SET_USER,
 		user
 	}
+}
+
+export const SET_EXISTING_QUEUE = 'SET_EXISTING_QUEUE'
+export function setExistingQueue( chats ) {
+	return {
+		type: SET_EXISTING_QUEUE,
+		chats
+	}
+}
+
+export const SET_AWAY = 'SET_AWAY'
+export const SET_PRESENT = 'SET_PRESENT'
+export function setStatus( away = true ) {
+	const type = away ? SET_AWAY : SET_PRESENT
+	const away_at = away ? now() : null
+	return { type, away_at }
 }
 
 function now() {

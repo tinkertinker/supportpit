@@ -1,7 +1,17 @@
 import React, { Component } from 'react'
 import './chat-list.scss'
+import moment from 'moment'
+import logger from 'debug'
+
+const debug = logger( 'tardis.chatlist' )
 
 export default class ChatList extends Component {
+
+	componentDidMount() {
+		setInterval( () => {
+			this.setState( { now: ( new Date() ).getTime() } )
+		}, 1000 )
+	}
 
 	renderChatItem( chat, i ) {
 		return (
@@ -9,7 +19,7 @@ export default class ChatList extends Component {
 				<img src={ chat.user.picture } />
 				<div>
 					<div className="chat-name">{ chat.user.name }</div>
-					<div>ts</div>
+					<div>{ moment( chat.opened_at ).fromNow() }</div>
 				</div>
 			</div>
 		)

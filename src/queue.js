@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import logger from 'debug'
+import { values } from 'lodash/object'
 
 const debug = logger( 'tardis.queue' )
 
@@ -8,7 +9,16 @@ class UserChat extends EventEmitter {
 	constructor( id, user ) {
 		super()
 		this.id = id
+		this.opened_at = now()
 		this.user = user
+	}
+
+	asJSON() {
+		return {
+			user: this.user,
+			id: this.id,
+			opened_at: this.opened_at
+		}
 	}
 
 }
@@ -45,4 +55,12 @@ export default class Queue extends EventEmitter {
 		return chat
 	}
 
+	openChats() {
+		return values( this.users ).sort( ( a, b ) => a.opened_at > b.opened_at ? 1 : -1 )
+	}
+
+}
+
+function now() {
+	return ( new Date() ).getTime()
 }

@@ -9,7 +9,11 @@ import { v4 as uuid } from 'uuid'
 let debug = logger( 'tardis.chat' )
 
 function parseToken( socket ) {
-	const { token } = parseCookie( socket.request.headers.cookie )
+	const { cookie } = socket.request.headers
+	if ( !cookie ) {
+		return null
+	}
+	const { token } = parseCookie( cookie )
 	return token
 }
 
@@ -60,9 +64,9 @@ export default function( server ) {
 				io.of( '/chat' ).to( chat.id ).emit( 'action', outbound )
 				io.to( chat.id ).emit( 'action', outbound )
 			} )
-			io.emit( 'open-request', user, user.id )
+			io.emit( 'open-request', chat.asJSON() )
 			socket.on( 'disconnect', () => {
-				io.emit( 'close-request', user, user.id )
+				io.emit( 'close-request', chat.asJSON() )
 			} )
 		}
 
@@ -88,6 +92,7 @@ export default function( server ) {
 		// TODO: authenticate agent
 		let user = { picture: 'http://1.gravatar.com/avatar/767fc9c115a1b989744c755db47feb60?s=200&r=pg&d=mm', name: 'Douglas Adams', id: 'sample' }
 		socket.emit( 'authorized', user )
+		socket.emit( 'chats', queue.openChats() )
 		socket.on( 'join-chat', ( id, fn ) => {
 			debug( 'join chat', id )
 			let chat = queue.join( socket, id, fn )

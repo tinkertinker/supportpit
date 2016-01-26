@@ -1,5 +1,5 @@
 import { combineReducers as combine } from 'redux'
-import { OPEN_REQUEST, CLOSE_REQUEST, RECEIVE_ACTION, OPEN_CHAT, EDIT_MESSAGE, CLEAR_MESSAGE, SET_USER } from './actions'
+import { OPEN_REQUEST, CLOSE_REQUEST, RECEIVE_ACTION, OPEN_CHAT, EDIT_MESSAGE, CLEAR_MESSAGE, SET_USER, SET_EXISTING_QUEUE, SET_AWAY, SET_PRESENT } from './actions'
 import { omit } from 'lodash/object'
 
 function online( state = [] ) {
@@ -8,10 +8,12 @@ function online( state = [] ) {
 
 function availableChats( state = [], action ) {
 	switch ( action.type ) {
+		case SET_EXISTING_QUEUE:
+			return action.chats.slice().sort( ( a, b ) => a.opened_at > b.opened_at ? 1 : -1 )
 		case OPEN_REQUEST:
-			return state.concat( { user: Object.assign( {}, action.user ), id: action.id } )
+			return [].concat( Object.assign( {}, action.chat ), state )
 		case CLOSE_REQUEST:
-			return state.filter( ( existing ) => existing.id !== action.id )
+			return state.filter( ( existing ) => existing.id !== action.chat.id )
 		default:
 			return state
 	}
@@ -71,6 +73,17 @@ function user( state = {}, action ) {
 	}
 }
 
-const reducers = combine( { online, availableChats, chats, editing, pending, user } )
+function status( state = { away: false, away_at: null }, action ) {
+	switch ( action.type ) {
+		case SET_AWAY:
+			return Object.assign( {}, { away: true, away_at: action.away_at } )
+		case SET_PRESENT:
+			return { away: false, away_at: null }
+		default:
+			return state
+	}
+}
+
+const reducers = combine( { online, availableChats, chats, editing, pending, user, status } )
 
 export { reducers as default }

@@ -11,6 +11,11 @@ import './hud.scss'
 
 export class Hud extends Component {
 
+	constructor( props ) {
+		super( props )
+		this.state = { away: false }
+	}
+
 	openChat( chat ) {
 		this.props.dispatch( joinChat( chat ) )
 	}
@@ -51,7 +56,34 @@ export class Hud extends Component {
 		)
 	}
 
+	notifyNewChats( chats ) {
+		if ( !this.props.status.away ) {
+			return
+		}
+		chats.forEach( ( chat ) => {
+			if ( chat.opened_at > this.props.status.away_at ) {
+				new Notification( `New request: ${chat.user.name}` )
+			}
+		} )
+	}
+
+	notifyNewMessages( chats ) {
+		if ( !this.props.status.away ) {
+			return
+		}
+		chats.forEach( ( chat ) => {
+			debug( 'notify if away', chat )
+			chat.actions.forEach( ( action ) => {
+				if ( action.timestamp > this.props.status.away_at && action.type === 'message' ) {
+					const notification = new Notification( `${action.user.name}: ${action.message}` )
+				}
+			} )
+		} )
+	}
+
 	render() {
+		this.notifyNewChats( this.props.availableChats )
+		this.notifyNewMessages( this.props.chats )
 		return (
 			<div className="hud">
 				<div className="queue-list">
@@ -72,7 +104,8 @@ function map( state ) {
 		availableChats: state.availableChats,
 		editing: state.editing,
 		pending: state.pending,
-		user: state.user
+		user: state.user,
+		status: state.status
 	}
 }
 
