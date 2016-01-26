@@ -36,11 +36,15 @@ export class Client extends React.Component {
 		return true
 	}
 
-	authorized( isAuthed, notAuthed ) {
-		if ( this.props.authorization === 'requested' ) {
-			return notAuthed()
+	authorized( unknownAuth, isAuthed, notAuthed ) {
+		switch ( this.props.authorization ) {
+			case 'requested':
+				return notAuthed()
+			case 'authorized':
+				return isAuthed()
+			default:
+				return unknownAuth()
 		}
-		return isAuthed()
 	}
 
 	updateNickname( e ) {
@@ -51,30 +55,42 @@ export class Client extends React.Component {
 		this.props.dispatch( identify( this.props.nickname ) )
 	}
 
+	renderChat() {
+		return (
+			<Chat
+				actions={this.props.actions}
+				pendingMessages={this.props.pendingMessages}
+				message={this.props.message}
+				chat={this.props.chat}
+				canSend={this.props.canSend}
+				onUpdateMessage={this.updateMessage.bind( this )}
+				onSendMessage={this.sendMessage.bind( this )}
+				title={this.title()}
+				isRemoteMessage={ this.isRemoteMessage.bind( this )} />
+			)
+	}
+
+	renderIdentify() {
+		return (
+			<div className="identify-form">
+				<input type="text" value={ this.props.nickname } onChange={ this.updateNickname.bind( this ) } placeholder="Name" />
+				<input type="button" value="Start" onClick={ this.sendNickname.bind( this ) } disabled={ this.props.nickname === '' } />
+			</div>
+		)
+	}
+
+	renderLoading() {
+		return (
+			<div className="loading-indicator">
+				<div className="throbber" />
+			</div>
+		)
+	}
+
 	render() {
 		return (
 			<div className="chat-container">
-				{ this.authorized( () => {
-					return (
-						<Chat
-							actions={this.props.actions}
-							pendingMessages={this.props.pendingMessages}
-							message={this.props.message}
-							chat={this.props.chat}
-							canSend={this.props.canSend}
-							onUpdateMessage={this.updateMessage.bind( this )}
-							onSendMessage={this.sendMessage.bind( this )}
-							title={this.title()}
-							isRemoteMessage={ this.isRemoteMessage.bind( this )} />
-						)
-				}, () => {
-					return (
-						<div className="identify-form">
-							<input type="text" value={ this.props.nickname } onChange={ this.updateNickname.bind( this ) } placeholder="Name" />
-							<input type="button" value="Start" onClick={ this.sendNickname.bind( this ) } disabled={ this.props.nickname === '' } />
-						</div>
-					)
-				} ) }
+				{ this.authorized( this.renderLoading.bind( this ), this.renderChat.bind( this ), this.renderIdentify.bind( this ) ) }
 			</div>
 		)
 	}
