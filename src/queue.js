@@ -23,23 +23,24 @@ export default class Queue extends EventEmitter {
 
 	// User is opening a support chat to get support
 	open( socket, user ) {
-		let chat = this.users[socket.id]
+		let chat = this.users[user.id]
 
 		if ( !chat ) {
 			// TODO: make a new chat
-			chat = new UserChat( socket.id, user )
-			this.users[socket.id] = chat
+			chat = new UserChat( user.id, user )
+			this.users[user.id] = chat
 		}
 
 		return chat
 	}
 
 	// Agent is joining a support chat
-	join( socket, id, complete ) {
+	join( socket, id ) {
 		// Look for the chat in the existing users, if there is no open chat then bail for now
 		let chat = this.users[id]
 		if ( !chat ) {
 			debug( 'Chat not found for', id )
+			return
 		}
 		return chat
 	}

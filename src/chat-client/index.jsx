@@ -35,7 +35,7 @@ socket.on( 'team', ( team ) => {
 	dispatch( updateTeam( team ) )
 } )
 
-socket.on( 'init', ( user ) => {
+socket.on( 'init', ( id, user ) => {
 	dispatch( initChat( user ) )
 	debug( "Initialized", user )
 } )

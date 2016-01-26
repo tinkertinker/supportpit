@@ -4,6 +4,7 @@ import { forSocket } from './teams'
 import { parse as parseCookie } from 'cookie'
 import Promise from 'promise'
 import Queue from './queue'
+import { v4 as uuid } from 'uuid'
 
 let debug = logger( 'tardis.chat' )
 
@@ -46,20 +47,22 @@ export default function( server ) {
 		let token = parseToken( socket )
 
 		let onUser = ( user ) => {
-			debug( 'found user?' )
-			queue.open( socket, user )
-			socket.emit( 'init', user )
+			let chat = queue.open( socket, user )
+			socket.emit( 'init', chat.id, user )
+			socket.join( chat.id, () => {
+				debug( 'User has joined their support chat', chat.id )
+			} )
 			socket.on( 'action', ( action, fn ) => {
 				fn( 'received' )
-				debug( 'sending to', socket.id, action, socket.rooms )
+				debug( 'sending to', chat.id, action )
 				// Send the message to anyone in this chat
-				let outbound = Object.assign( {}, action, { user, chat_id: socket.id } )
-				io.of( '/chat' ).to( socket.id ).emit( 'action', outbound )
-				io.to( socket.id ).emit( 'action', outbound )
+				let outbound = Object.assign( {}, action, { user, chat_id: chat.id } )
+				io.of( '/chat' ).to( chat.id ).emit( 'action', outbound )
+				io.to( chat.id ).emit( 'action', outbound )
 			} )
-			io.emit( 'open-request', user, socket.id )
+			io.emit( 'open-request', user, user.id )
 			socket.on( 'disconnect', () => {
-				io.emit( 'close-request', user, socket.id )
+				io.emit( 'close-request', user, user.id )
 			} )
 		}
 
@@ -72,7 +75,7 @@ export default function( server ) {
 				debug( 'User not found', e )
 				socket.emit( 'identify' )
 				socket.on( 'identify', ( name ) => {
-					onUser( { name, anonymous: true } )
+					onUser( { name, anonymous: true, id: uuid() } )
 				} )
 				// give the client a chance to enter user's info
 			} )
@@ -86,7 +89,12 @@ export default function( server ) {
 		let user = { picture: 'http://1.gravatar.com/avatar/767fc9c115a1b989744c755db47feb60?s=200&r=pg&d=mm', name: 'Douglas Adams', id: 'sample' }
 		socket.emit( 'authorized', user )
 		socket.on( 'join-chat', ( id, fn ) => {
+			debug( 'join chat', id )
 			let chat = queue.join( socket, id, fn )
+
+			if ( !chat ) {
+				return debug( 'Failed to find chat', id )
+			}
 
 			if ( socket.rooms[id] ) {
 				debug( 'already in room', id )
@@ -94,8 +102,7 @@ export default function( server ) {
 			}
 
 			socket.join( id, ( e ) => {
-				if ( e ) return debug( 'Failed to join room', socket.id, id )
-				debug( 'Sockets', io.sockets, id )
+				if ( e ) return debug( 'Failed to join room', chat.id, id )
 				fn( chat.user )
 				let action = { type: 'join', user, chat_id: id }
 				io.of( '/chat' ).to( id ).emit( 'action', action )
@@ -103,7 +110,7 @@ export default function( server ) {
 			} )
 
 			socket.on( 'action', ( chatId, action, complete ) => {
-				let outbound = Object.assign( {}, action, {user} )
+				let outbound = Object.assign( {}, action, {user, chat_id: chatId} )
 				io.of( '/chat' ).to( chatId ).emit( 'action', outbound )
 				io.to( chatId ).emit( 'action', outbound )
 				complete()

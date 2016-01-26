@@ -8,6 +8,9 @@ import teams, { withTeam } from './src/teams'
 import chatServer from './src/chat-server'
 
 const log = debug( 'tardis.server' )
+const environment = process.NODE_ENV || 'development'
+
+log( 'Starting tardis in:', environment )
 
 let app = express()
 
@@ -23,7 +26,7 @@ let server = http.createServer( app )
 
 chatServer( server )
 
-if ( process.env.NODE_ENV === 'development' ) {
+if ( environment === 'development' ) {
 	app.use( '/chat', withTeam( require( './dev' ).middleware ) )
 	app.use( '/hud', withTeam( require( './hud' ).middleware ) )
 } else {

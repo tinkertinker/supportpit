@@ -63,7 +63,7 @@ function pending( state = {} ) {
 }
 
 function user( state = {}, action ) {
-	switch ( state ) {
+	switch ( action.type ) {
 		case SET_USER:
 			return Object.assign( {}, action.user )
 		default:

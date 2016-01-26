@@ -25,9 +25,9 @@ export class Hud extends Component {
 
 	isRemoteMessage( action ) {
 		if ( this.props.user && action.user && this.props.user.id === action.user.id ) {
-			return true
+			return false
 		}
-		return false
+		return true
 	}
 
 	renderChatPanel( chat, i ) {

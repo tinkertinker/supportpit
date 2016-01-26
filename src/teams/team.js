@@ -1,12 +1,12 @@
 import { v4 as uuid } from 'uuid'
 
 const USERS = [
-	{token: 'abcdefg', username: 'someuser', name: 'Jane Adams', picture: 'https://avatars0.githubusercontent.com/u/19795?v=3&s=460'}
+	{token: 'abcdefg', id: uuid(), username: 'someuser', name: 'Jane Adams', picture: 'https://avatars0.githubusercontent.com/u/19795?v=3&s=460'}
 ]
 
 const MEMBERS = [
-	{ name: 'Robert Collins', email: 'robert@automattic.com', role: 'agent' },
-	{ name: 'Toni', email: 'toni@automattic.com', role: 'admin' }
+	{name: 'Robert Collins', email: 'robert@automattic.com', role: 'agent'},
+	{name: 'Toni', email: 'toni@automattic.com', role: 'admin'}
 ]
 
 const INVITATIONS = [
