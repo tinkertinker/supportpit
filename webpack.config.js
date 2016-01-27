@@ -1,15 +1,17 @@
+const path = require( 'path' );
 const autoprefixer = require( 'autoprefixer' );
 const HtmlWebpackPlugin = require( 'html-webpack-plugin' );
 
 module.exports = {
-	context: __dirname + '/src/hud-client',
+	context: __dirname + '/src',
 	devtool: 'sourcemap',
-	entry: [
-		'./'
-	],
+	entry: {
+		chat: './chat-client',
+		hud: './hud-client'
+	},
 	output: {
-		path: __dirname + '/dist/hud',
-		filename: 'app.js'
+		path: path.join( __dirname + '/dist' ),
+		filename: '[name].js'
 	},
 	module: {
 		preLoaders: [
@@ -26,7 +28,8 @@ module.exports = {
 		moduleDirectories: [ 'lib', 'node_modules' ]
 	},
 	plugins: [
-		new HtmlWebpackPlugin( { title: 'HUD' } )
+		new HtmlWebpackPlugin( { title: 'Chat', filename: 'chat.html', chunks: [ 'chat' ] } ),
+		new HtmlWebpackPlugin( { title: 'HUD', filename: 'hud.html', chunks: [ 'hud' ] } )
 	],
 	postcss: [ autoprefixer() ]
 };

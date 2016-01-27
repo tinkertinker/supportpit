@@ -27,11 +27,11 @@ let server = http.createServer( app )
 chatServer( server )
 
 if ( environment === 'development' ) {
-	app.use( '/chat', withTeam( require( './dev' ).middleware ) )
-	app.use( '/hud', withTeam( require( './hud' ).middleware ) )
+	// app.use( '/chat', withTeam( require( './dev' ).middleware ) )
+	// app.use( '/hud', withTeam( require( './hud' ).middleware ) )
+	app.use( withTeam( require( './dev' ).middleware ) )
 } else {
-	app.use( '/chat', withTeam( serveStatic( './dist/chat' ) ) )
-	app.use( '/hud', withTeam( serveStatic( './dist/hud' ) ) )
+	app.use( '/', withTeam( serveStatic( './dist/' ) ) )
 }
 
 server.listen( process.env.PORT || 3000, () => {
