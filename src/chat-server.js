@@ -93,6 +93,13 @@ export default function( server ) {
 		let user = { picture: 'http://1.gravatar.com/avatar/767fc9c115a1b989744c755db47feb60?s=200&r=pg&d=mm', name: 'Douglas Adams', id: 'sample' }
 		socket.emit( 'authorized', user )
 		socket.emit( 'chats', queue.openChats() )
+		socket.on( 'action', ( chatId, action, complete ) => {
+			debug( "Received action", action )
+			let outbound = Object.assign( {}, action, {user, chat_id: chatId} )
+			io.of( '/chat' ).to( chatId ).emit( 'action', outbound )
+			io.to( chatId ).emit( 'action', outbound )
+			complete()
+		} )
 		socket.on( 'join-chat', ( id, fn ) => {
 			debug( 'join chat', id )
 			let chat = queue.join( socket, id, fn )
@@ -114,12 +121,6 @@ export default function( server ) {
 				io.to( id ).emit( 'action', action )
 			} )
 
-			socket.on( 'action', ( chatId, action, complete ) => {
-				let outbound = Object.assign( {}, action, {user, chat_id: chatId} )
-				io.of( '/chat' ).to( chatId ).emit( 'action', outbound )
-				io.to( chatId ).emit( 'action', outbound )
-				complete()
-			} )
 		} )
 	} )
 }
