@@ -34,7 +34,7 @@ if ( environment === 'development' ) {
 	app
 	.use( '/', subdomain( 'chat', serveStatic( './dist/' ) ) )
 	.get( '*', ( req, res ) => {
-		res.sendFile( './dist/index.html' )
+		res.sendFile( __dirname + '/dist/index.html' )
 	} )
 }
 
