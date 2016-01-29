@@ -2,13 +2,14 @@ import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import Hud from './ui/hud'
-import configureStore from './configureStore'
+import configureStore from '../configure-store'
 import logger from 'debug'
 import { openRequest, closeRequest, receiveAction, setUser, setExistingQueue, setStatus } from './actions'
 import socket from './socket'
+import reducer from './reducers'
 
 const debug = logger( 'tardis.hud' )
-const store = configureStore()
+const store = configureStore( reducer )
 
 const node = document.createElement( 'div' )
 document.body.appendChild( node )

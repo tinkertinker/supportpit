@@ -22,7 +22,7 @@ export function inputNickname( name ) {
 
 export const IDENTIFY = 'IDENTIFY'
 export function identify( name ) {
-	return ( dispatch ) => {
+	return () => {
 		socket.emit( 'identify', name )
 	}
 }

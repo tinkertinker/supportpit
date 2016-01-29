@@ -7,7 +7,8 @@ module.exports = {
 	devtool: 'sourcemap',
 	entry: {
 		chat: './chat-client',
-		hud: './hud-client'
+		hud: './hud-client',
+		group: './group-client'
 	},
 	output: {
 		path: path.join( __dirname + '/dist' ),
@@ -29,7 +30,8 @@ module.exports = {
 	},
 	plugins: [
 		new HtmlWebpackPlugin( { title: 'Chat', filename: 'chat.html', chunks: [ 'chat' ] } ),
-		new HtmlWebpackPlugin( { title: 'HUD', filename: 'hud.html', chunks: [ 'hud' ] } )
+		new HtmlWebpackPlugin( { title: 'HUD', filename: 'hud.html', chunks: [ 'hud' ] } ),
+		new HtmlWebpackPlugin( { title: 'Group', filename: 'index.html', chunks: [ 'group' ] } )
 	],
 	postcss: [ autoprefixer() ]
 };

@@ -20,7 +20,7 @@ app.use( hotMiddleware( compiler, { noInfo: true } ) );
 app.get( '*', ( req, res ) => {
 	let fs = compiler.outputFileSystem
 	res.set( 'Content-Type', 'text/html' );
-	const filePath = path.join( __dirname, 'dist', req.path, 'index.html' )
+	const filePath = path.join( __dirname, 'dist', 'index.html' )
 	debug( 'Serving static file', filePath, fs.data )
 	res.send( compiler.outputFileSystem.readFileSync( filePath ) )
 } );

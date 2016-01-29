@@ -1,0 +1,30 @@
+body {
+	margin: 0;
+	font: 14px/1.4 "Helvetica Neue", Helvetica, arial, sans-serif;
+}
+
+.loading-indicator {
+	display: flex;
+	justify-content: space-around;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+
+.throbber {
+	align-self: center;
+	width: 18px;
+	height: 18px;
+	border-radius: 18px;
+	border: 2px solid hsla( 200, 50%, 50%, 1.0);
+	box-sizing: border-box;
+	animation: loading 1s infinite;
+}
+
+@keyframes loading {
+	0% { transform: scale( 0, 0 ); border-width: 10px; }
+	50% { opacity: 1; }
+	100% { transform: scale( 1, 1 ); border-width: 0; opacity: 0; }
+}

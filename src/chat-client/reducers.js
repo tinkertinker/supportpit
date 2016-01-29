@@ -1,11 +1,8 @@
 import { combineReducers as combine } from 'redux'
 import { INIT_CHAT, UPDATE_MESSAGE, CLEAR_MESSAGE, SENT_MESSAGE, RECEIVE_ACTION, UPDATE_TEAM, IDENTIFY_USER, INPUT_NICKNAME } from './actions'
-import logger from 'debug'
+// import logger from 'debug'
 
-const debug = logger( 'tardis.reducer' )
-
-function chat( state = { team: null, user: null }, action ) {
-}
+// const debug = logger( 'tardis.reducer' )
 
 function actions( state = [], action ) {
 	switch ( action.type ) {
@@ -41,26 +38,24 @@ function pendingMessages( state = [], action ) {
 function user( state = { indentified: false }, action ) {
 	switch ( action.type ) {
 		case INIT_CHAT:
-			const { user } = action
-			return Object.assign( {}, state, user, { identified: true } )
+			return Object.assign( {}, state, { user: action.user, identified: true } )
 		default:
 			return state
 	}
 	return state
 }
 
-function team( state = {}, action) {
-	switch( action.type ) {
+function team( state = {}, action ) {
+	switch ( action.type ) {
 		case UPDATE_TEAM:
-			const { team } = action
-			return Object.assign( {}, state, team )
+			return Object.assign( {}, state, { team: action.team } )
 		default:
 			return state
 	}
 }
 
 function authorization( state = 'unknown', action ) {
-	switch( action.type ) {
+	switch ( action.type ) {
 		case IDENTIFY_USER:
 			return 'requested'
 		case INIT_CHAT:
@@ -79,6 +74,6 @@ function nickname( state = '', action ) {
 	}
 }
 
-const reducer = combine( {actions, pendingMessages, message, team, user, authorization, nickname } )
+const reducer = combine( { actions, pendingMessages, message, team, user, authorization, nickname } )
 
 export { reducer as default }

@@ -103,6 +103,7 @@
 		line-height: 1.4;
 		word-wrap: break-word;
 		border-radius: 4px;
+		align-self: flex-start;
 	}
 
 	&.remote {
@@ -112,9 +113,17 @@
 		}
 	}
 
+	img {
+		margin: 0 8px;
+		box-sizing: border-box;
+		max-width: 32px;
+		border-radius: 32px;
+		align-self: flex-start;
+	}
+
 	.author {
 		flex: 0 0 auto;
-		padding: 8px;
+		align-self: center;
 	}
 
 }

@@ -32,7 +32,7 @@ export function joinChat( chat ) {
 
 export const LEAVE_CHAT = 'LEAVE_CHAT'
 export function leaveChat( chat ) {
-	return ( dispatch ) => {
+	return () => {
 		socket.emit( 'leave-chat', chat.id, () => {
 			debug( 'leave chat', chat )
 		} )

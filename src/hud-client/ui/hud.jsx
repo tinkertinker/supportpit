@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { connect, Provider } from 'react-redux'
+import { connect } from 'react-redux'
 import ChatList from './chat-list'
 import Chat from '../../chat-client/ui/chat'
 import { joinChat, updateChatMessage, sendChatMessage, leaveChat } from '../actions'
@@ -66,7 +66,7 @@ export class Hud extends Component {
 		}
 		chats.forEach( ( chat ) => {
 			if ( chat.opened_at > this.props.status.away_at ) {
-				new Notification( `New request: ${chat.user.name}` )
+				const notification = new Notification( `New request: ${chat.user.name}` )
 			}
 		} )
 	}

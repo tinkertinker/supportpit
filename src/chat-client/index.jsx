@@ -1,23 +1,20 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
-import configureStore from './configureStore'
+import configureStore from '../configure-store'
 import Client from './ui/client'
 import { receiveAction, initChat, identifyUser, updateTeam } from './actions'
 import socket from './socket'
 import logger from 'debug'
+import reducer from './reducers'
 
 const debug = logger( 'tardis.app' )
 
 const node = document.createElement( 'div' )
 document.body.appendChild( node )
 
-const store = configureStore()
+const store = configureStore( reducer )
 const { dispatch } = store
-
-socket.on( 'event', () => {
-	debug( 'event', e )
-} )
 
 socket.on( 'connect', () => {
 	debug( 'connected', socket.id )
@@ -37,7 +34,7 @@ socket.on( 'team', ( team ) => {
 
 socket.on( 'init', ( id, user ) => {
 	dispatch( initChat( user ) )
-	debug( "Initialized", user )
+	debug( 'Initialized', user )
 } )
 
 socket.on( 'action', ( action ) => {

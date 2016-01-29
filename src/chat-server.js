@@ -5,6 +5,11 @@ import { parse as parseCookie } from 'cookie'
 import Promise from 'promise'
 import Queue from './queue'
 import { v4 as uuid } from 'uuid'
+import { identify } from './wpcom'
+import { findOrCreateUser, getUser as getGroupsUser, createRoom, getRoom, joinRoom, memberDetails } from './groups'
+import { createHmac } from 'crypto'
+
+const SECRET = process.env.SECRET || uuid()
 
 let debug = logger( 'tardis.chat' )
 
@@ -42,10 +47,114 @@ function getUser( token, team ) {
 // 	}
 // }
 
+function sign( value, callback ) {
+	process.nextTick( () => {
+		const hmac = createHmac( 'sha256', SECRET );
+		hmac.update( value )
+		callback( null, `${value}.${hmac.digest( 'base64' )}` )
+	} )
+}
+
+function verify( signed, callback ) {
+	const index = signed.lastIndexOf( '.' )
+	if ( index < 0 ) {
+		return callback( new Error( 'missing signature' ) )
+	}
+
+	const value = signed.slice( 0, index )
+
+	sign( value, ( e, verified ) => {
+		if ( signed !== verified ) {
+			return callback( new Error( 'signature does not match' ) )
+		}
+		callback( null, value )
+	} )
+}
+
 export default function( server ) {
 	let io = socketio( server )
 
 	const queue = new Queue( io )
+
+	io.of( '/group' ).on( 'connection', ( socket ) => {
+		debug( 'socket joined', socket.id )
+		const startSession = ( user ) => {
+			const onAction = ( room_id, action ) => {
+				// check if the socket is in the room
+				const to = `room-${room_id}`
+				if ( socket.rooms[to] ) {
+					getRoom( room_id, ( e, room ) => {
+						if ( e ) return debug( 'room does not exist', e )
+						debug( 'onAction', action )
+						const userAction = Object.assign( {}, action, {
+							user: Object.assign( {}, memberDetails( user ), { id: user.id } )
+						} )
+						room.actions = room.actions.concat( userAction )
+						io.of( '/group' ).to( to ).emit( 'action', room_id, userAction )
+					} )
+				} else {
+					debug( 'User is not member of room', room_id )
+				}
+			}
+			const initializeRoom = ( e, room, newUser ) => {
+				socket.emit( 'init-room', room )
+				if ( newUser ) {
+					onAction( room.id, { type: 'join' } )
+				}
+			}
+
+			// The user hasn't joined the room yet but is watching
+			const viewRoom = ( room ) => {
+				socket.join( `room-${room.id}` )
+				initializeRoom( null, room, false )
+			}
+
+			socket.on( 'view-room', ( id ) => getRoom( id, ( e, room ) => viewRoom( room ) ) )
+			socket.on( 'start-room', () => createRoom( user, ( e, room ) => joinRoom( socket, user, room, initializeRoom ) ) )
+			socket.on( 'join-room', ( id ) => getRoom( id, ( e, room ) => joinRoom( socket, user, room, initializeRoom ) ) )
+			sign( user.id, ( e, token ) => {
+				debug( 'signed id?', token )
+				socket.emit( 'session', { token, user } )
+				socket.join( `user-${user.id}`, ( e ) => {
+					if ( e ) return debug( 'failed to join user room', e )
+					debug( 'socket joined user room' )
+				} )
+			} )
+			socket.on( 'action', ( id, action ) => {
+				// TODO: check if user is a member of the room they're attempting to send an action for
+				onAction( id, action )
+				// let outbound = Object.assign( {}, action, { user, chat_id: chat.id } )
+				// io.of( '/chat' ).to( chat.id ).emit( 'action', outbound )
+				// io.to( chat.id ).emit( 'action', outbound )
+			} )
+		}
+
+		socket.emit( 'authorize' )
+		socket.on( 'auth', ( auth_details ) => {
+			debug( 'use token to access user data', auth_details )
+			identify( auth_details, ( e, identity ) => {
+				// now we register the user
+				findOrCreateUser( auth_details.service, auth_details.token, identity, ( e, user ) => {
+					startSession( user )
+				} )
+			} )
+		} )
+		socket.on( 'token', ( token ) => {
+			debug( 'check signed token', token )
+			verify( token, ( e, value ) => {
+				// find the user
+				if ( e ) {
+					return socket.emit( 'unauthorized' )
+				}
+				getGroupsUser( value, ( e, user ) => {
+					if ( e || !user ) {
+						return socket.emit( 'unauthorized' )
+					}
+					startSession( user )
+				} )
+			} )
+		} )
+	} )
 
 	io.of( '/chat' ).on( 'connection', ( socket ) => {
 		let token = parseToken( socket )
@@ -94,7 +203,7 @@ export default function( server ) {
 		socket.emit( 'authorized', user )
 		socket.emit( 'chats', queue.openChats() )
 		socket.on( 'action', ( chatId, action, complete ) => {
-			debug( "Received action", action )
+			debug( 'Received action', action )
 			let outbound = Object.assign( {}, action, {user, chat_id: chatId} )
 			io.of( '/chat' ).to( chatId ).emit( 'action', outbound )
 			io.to( chatId ).emit( 'action', outbound )
@@ -120,7 +229,6 @@ export default function( server ) {
 				io.of( '/chat' ).to( id ).emit( 'action', action )
 				io.to( id ).emit( 'action', action )
 			} )
-
 		} )
 	} )
 }

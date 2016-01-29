@@ -1,7 +1,13 @@
 import React, { Component } from 'react'
 import classnames from 'classnames'
+import { isEmpty } from 'lodash/lang'
+import { when } from '../../react-fn'
 
 import './chat.scss'
+
+const title = when( ( { title } ) => !isEmpty( title ), ( { title } ) => (
+	<div className="title-bar">{ title }</div>
+) )
 
 export default class Chat extends Component {
 
@@ -44,6 +50,7 @@ export default class Chat extends Component {
 				return (
 					<div key={i} className={ classnames( 'message', { remote: this.props.isRemoteMessage( action ) } ) }>
 						<div className="content">{ action.message }</div>
+						{ when( ( { user } ) => ! isEmpty( user.picture ), ( { user } ) => <img src={ user.picture } /> )( { user: action.user } ) }
 						<div className="author">{ action.user.name }</div>
 					</div>
 				)
@@ -93,7 +100,7 @@ export default class Chat extends Component {
 		const buttonDisabled = !this.props.canSend
 		return (
 			<div className="chat">
-				<div className="title-bar">{ this.props.title }</div>
+				{ title( { title: this.props.title } ) }
 				<div ref={( n ) => this.updateScrollOffset( n ) } className="log" onScroll={ this.onScrollLog.bind( this ) }>
 					<div className="messages">
 						{ this.props.actions.map( this.renderAction.bind( this ) ) }
@@ -110,4 +117,23 @@ export default class Chat extends Component {
 			</div>
 		)
 	}
+}
+
+Chat.defaultProps = {
+	message: '',
+	actions: [],
+	pendingMessages: [],
+	canSend: false,
+	isRemoteMessage: () => true
+}
+
+Chat.propTypes = {
+	onUpdateMessage: React.PropTypes.func.isRequired,
+	onSendMessage: React.PropTypes.func.isRequired,
+	isRemoteMessage: React.PropTypes.func,
+	canSend: React.PropTypes.bool,
+	message: React.PropTypes.string,
+	actions: React.PropTypes.array.isRequired,
+	pendingMessages: React.PropTypes.array,
+	title: React.PropTypes.string
 }

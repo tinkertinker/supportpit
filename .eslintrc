@@ -11,7 +11,14 @@
 		"experimentalObjectRestSpread": true,
 		"jsx": true
 	},
+	"settings": {
+		"react": {
+			"pragma": "React"
+		}
+	},
 	"rules": {
+		"react/jsx-uses-react": 1,
+		"react/jsx-uses-vars": 1,
 		"brace-style": [ 1, "1tbs" ],
 		// REST API objects include underscores
 		"camelcase": 0,
