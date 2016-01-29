@@ -6,6 +6,7 @@ let config = {}
 try {
 	config = require( '../local.config.js' )
 } catch ( e ) {
+	config = JSON.parse( process.env.TARDIS_CONFIG )
 	debug( 'Failed to load local config, falling back to', config )
 }
 
