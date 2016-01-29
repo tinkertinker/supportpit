@@ -15,6 +15,7 @@ let config = {}
 try {
 	config = require( './local.config.js' )
 } catch ( e ) {
+	config = JSON.parse( process.env.TARDIS_CONFIG )
 	debug( Error( `Missing ./local.config.js using default ${config}` ) )
 }
 
