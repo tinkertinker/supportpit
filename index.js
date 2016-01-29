@@ -31,7 +31,11 @@ if ( environment === 'development' ) {
 	app.use( subdomain( 'chat', require( './dev' ).middleware ) )
 } else {
 	app.use( '/', withTeam( serveStatic( './dist/' ) ) )
-	app.use( '/', subdomain( 'chat', serveStatic( './dist/' ) ) )
+	app
+	.use( '/', subdomain( 'chat', serveStatic( './dist/' ) ) )
+	.get( '*', ( req, res ) => {
+		res.sendFile( './dist/index.html' )
+	} )
 }
 
 server.listen( process.env.PORT || 3000, () => {
