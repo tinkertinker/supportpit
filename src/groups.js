@@ -4,9 +4,8 @@ import { isEmpty } from 'lodash/lang'
 import { v4 as uuid } from 'uuid'
 import logger from 'debug'
 import mongoose, { Schema } from 'mongoose'
-import { get } from './settings'
 
-mongoose.connect( get( 'mongodb-url' ) )
+mongoose.connect( process.env['MONGODB_URL'] || process.env['MONGOLAB_URI'] || 'mongodb://localhost/chat' )
 
 const RoomSchema = new Schema( {
 	id: String,
