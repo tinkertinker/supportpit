@@ -18,14 +18,16 @@ const query = stringify( {
 } )
 
 const chat = ( { message, dispatch, canSend, actions, room, user } ) => (
-	<Chat
-		canSend={ canSend }
-		onUpdateMessage={ ( newMessage ) => dispatch( setMessage( newMessage ) ) }
-		onSendMessage={ () => dispatch( sendMessage( room.id, message ) ) }
-		isRemoteMessage={ ( action ) => action.user.id !== user.id }
-		message={ message }
-		actions={ actions }
-		title="Group Chat" />
+	<div id="chat-container">
+		<Chat
+			canSend={ canSend }
+			onUpdateMessage={ ( newMessage ) => dispatch( setMessage( newMessage ) ) }
+			onSendMessage={ () => dispatch( sendMessage( room.id, message ) ) }
+			isRemoteMessage={ ( action ) => action.user.id !== user.id }
+			message={ message }
+			actions={ actions }
+			title="Group Chat" />
+	</div>
 )
 
 const login = ( { authURL } ) => (

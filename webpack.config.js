@@ -29,9 +29,9 @@ module.exports = {
 		moduleDirectories: [ 'lib', 'node_modules' ]
 	},
 	plugins: [
-		new HtmlWebpackPlugin( { title: 'Chat', filename: 'chat.html', chunks: [ 'chat' ] } ),
-		new HtmlWebpackPlugin( { title: 'HUD', filename: 'hud.html', chunks: [ 'hud' ] } ),
-		new HtmlWebpackPlugin( { title: 'Group', filename: 'index.html', chunks: [ 'group' ] } )
+		new HtmlWebpackPlugin( { title: 'Chat', filename: 'chat.html', chunks: [ 'chat' ], template: './index.ejs' } ),
+		new HtmlWebpackPlugin( { title: 'HUD', filename: 'hud.html', chunks: [ 'hud' ], template: './index.ejs' } ),
+		new HtmlWebpackPlugin( { title: 'Group', filename: 'index.html', chunks: [ 'group' ], template: './index.ejs' } )
 	],
 	postcss: [ autoprefixer() ]
 };

@@ -3,6 +3,14 @@ body {
 	font: 14px/1.4 "Helvetica Neue", Helvetica, arial, sans-serif;
 }
 
+.chat-container {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
 .loading-indicator {
 	display: flex;
 	justify-content: space-around;
