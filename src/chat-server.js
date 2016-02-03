@@ -6,7 +6,7 @@ import Promise from 'promise'
 import Queue from './queue'
 import { v4 as uuid } from 'uuid'
 import { identify } from './wpcom'
-import { findOrCreateUser, getUser as getGroupsUser, createRoom, getRoom, joinRoom, memberDetails } from './groups'
+import { findOrCreateUser, getUser as getGroupsUser, createRoom, getRoom, joinRoom, memberDetails, recordRoomAction } from './groups'
 import { createHmac } from 'crypto'
 
 const SECRET = process.env.SECRET || uuid()
@@ -85,18 +85,21 @@ export default function( server ) {
 				if ( socket.rooms[to] ) {
 					getRoom( room_id, ( e, room ) => {
 						if ( e ) return debug( 'room does not exist', e )
+						if ( !room ) return debug( 'failed to find room' )
 						debug( 'onAction', action )
 						const userAction = Object.assign( {}, action, {
 							user: Object.assign( {}, memberDetails( user ), { id: user.id } )
 						} )
-						room.actions = room.actions.concat( userAction )
-						io.of( '/group' ).to( to ).emit( 'action', room_id, userAction )
+						recordRoomAction( room, userAction, ( e ) => {
+							io.of( '/group' ).to( to ).emit( 'action', room_id, userAction )
+						} )
 					} )
 				} else {
 					debug( 'User is not member of room', room_id )
 				}
 			}
 			const initializeRoom = ( e, room, newUser ) => {
+				debug( 'initialize room?', e, room, newUser )
 				socket.emit( 'init-room', room )
 				if ( newUser ) {
 					onAction( room.id, { type: 'join' } )
@@ -105,6 +108,8 @@ export default function( server ) {
 
 			// The user hasn't joined the room yet but is watching
 			const viewRoom = ( room ) => {
+				if ( ! room ) return debug( 'did not find room', room )
+
 				socket.join( `room-${room.id}` )
 				initializeRoom( null, room, false )
 			}
