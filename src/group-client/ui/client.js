@@ -6,7 +6,7 @@ import { setMessage, sendMessage, createRoom } from '../actions'
 import { stringify } from 'querystring'
 import { get } from '../../settings'
 import logger from 'debug'
-import { not, when, or } from '../../react-fn'
+import { not, when, or, pipe } from '../../react-fn'
 import './style'
 
 const debug = logger( 'tardis.client' )
@@ -39,18 +39,6 @@ const listRooms = ( { rooms, dispatch } ) => (
 		<div onClick={ () => dispatch( createRoom() ) }>Start new room</div>
 	</div>
 )
-
-const pipe = ( ... actions ) => ( props ) => {
-	var i = 0, action, result
-	for ( i = 0; i < actions.length; i++ ) {
-		action = actions[i]
-		result = action( props )
-		if ( result ) {
-			return result
-		}
-	}
-	throw new Error( 'Nothing to render' )
-}
 
 const loading = () => (
 	<div className="loading-indicator"><div className="throbber"></div></div>
