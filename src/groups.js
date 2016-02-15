@@ -5,12 +5,12 @@ import { v4 as uuid } from 'uuid'
 import logger from 'debug'
 import mongoose, { Schema } from 'mongoose'
 
-mongoose.connect( process.env.MONGODB_URL  || process.env.MONGOLAB_URI || 'mongodb://localhost/chat' )
+mongoose.connect( process.env.MONGODB_URL || process.env.MONGOLAB_URI || 'mongodb://localhost/chat' )
 
 const RoomSchema = new Schema( {
 	id: String,
 	creator: String,
-	actions: [{ name: String, picture: String, type: String, id: String }],
+	actions: [{user: Object, timestamp: Number, type: String, id: String, message: String}],
 	members: [{id: String, picture: String, name: String }]
 } )
 
@@ -59,7 +59,7 @@ export function getUser( id, callback ) {
 export function findOrCreateUser( service, auth, identity, callback ) {
 	process.nextTick( () => {
 		// depending on the service, different query operators
-		User.findOne( { identities: { $elemMatch : { service, 'identity.ID': identity.ID } } } ).exec( ( e, user ) => {
+		User.findOne( { identities: { $elemMatch: { service, 'identity.ID': identity.ID } } } ).exec( ( e, user ) => {
 			if ( e ) return callback( e )
 			if ( !user ) return register( service, auth, identity, callback )
 			callback( null, user )
@@ -127,9 +127,15 @@ export function memberDetails( user ) {
 }
 
 export function recordRoomAction( room, action, callback ) {
-	// TODO: persist the room action
-	debug( 'record room action', room, action )
-	callback( new Error( 'not implemented' ) )
+	const newActions = room.actions.concat( action )
+	room.set( 'actions',  newActions )
+	debug( 'Recording action', newActions )
+	debug( 'Actions set to', room.actions )
+	room.save( ( e ) => {
+		if ( e ) return callback( e )
+		debug( 'Added actions to room', room )
+		callback()
+	} )
 }
 
 function userMatches( user, service, identity ) {

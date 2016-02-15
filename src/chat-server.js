@@ -91,6 +91,7 @@ export default function( server ) {
 							user: Object.assign( {}, memberDetails( user ), { id: user.id } )
 						} )
 						recordRoomAction( room, userAction, ( e ) => {
+							if ( e ) return debug( "Failed to record action", e )
 							io.of( '/group' ).to( to ).emit( 'action', room_id, userAction )
 						} )
 					} )
