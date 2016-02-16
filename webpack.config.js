@@ -8,7 +8,8 @@ module.exports = {
 	entry: {
 		chat: './chat-client',
 		hud: './hud-client',
-		group: './group-client'
+		group: './group-client',
+		auth: './auth-client'
 	},
 	output: {
 		path: path.join( __dirname + '/dist' ),

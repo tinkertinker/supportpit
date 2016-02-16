@@ -1,7 +1,11 @@
 /*
  * If condition evaluates to truthy, execute perform.
  */
-export const when = ( condition, perform ) => ( props ) => condition( props ) ? perform( props ) : null
+export const when = ( condition, perform, fallback = () => null ) => ( ... args ) => (
+	condition( ... args )
+		? perform( ... args )
+		: fallback( ... args )
+)
 
 /*
  * Inverts the result of the given fn
@@ -35,3 +39,7 @@ export const pipe = ( ... actions ) => ( ... args ) => {
 	}
 	throw new Error( 'Nothing to render' )
 }
+
+export const each = ( ... actions ) => ( ... args ) => actions.forEach( ( action ) => action( ... args ) )
+
+export { pipe as first }

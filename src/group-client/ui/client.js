@@ -3,19 +3,11 @@ import { connect } from 'react-redux'
 import { isEmpty } from 'lodash/lang'
 import Chat from '../../chat-client/ui/chat'
 import { setMessage, sendMessage, createRoom } from '../actions'
-import { stringify } from 'querystring'
-import { get } from '../../settings'
-import logger from 'debug'
 import { not, when, or, pipe } from '../../react-fn'
+import { authURL } from '../../wpcom'
 import './style'
 
-const debug = logger( 'tardis.client' )
-
-const query = stringify( {
-	client_id: get( 'wordpress-com-client-id' ),
-	redirect_uri: get( 'wordpress-com-redirect-uri' ),
-	response_type: 'token'
-} )
+const debug = require( 'debug' )( 'tardis.client' )
 
 const chat = ( { message, dispatch, canSend, actions, room, user } ) => (
 	<div id="chat-container">
@@ -30,7 +22,7 @@ const chat = ( { message, dispatch, canSend, actions, room, user } ) => (
 	</div>
 )
 
-const login = ( { authURL } ) => (
+const login = () => (
 	<div className="login-form">
 		<a href={authURL}>Sign in with WordPress.com</a>
 	</div>
@@ -59,9 +51,8 @@ const composed = pipe(
 )
 
 const map = ( { user, message, actions, authenticationStatus, room, rooms } ) => {
-	const authURL = `https://public-api.wordpress.com/oauth2/authorize?${query}`
 	return {
-		user, message, authURL, authenticationStatus, room, rooms,
+		user, message, authenticationStatus, room, rooms,
 		actions: room.actions || [],
 		canSend: !isEmpty( message ) }
 }

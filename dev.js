@@ -27,4 +27,4 @@ app.get( '*', ( req, res ) => {
 	res.send( compiler.outputFileSystem.readFileSync( filePath ) )
 } );
 
-export { app as middleware }
+export { app as middleware, compiler }

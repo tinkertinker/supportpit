@@ -4,7 +4,7 @@ import { forSocket } from './teams'
 import { parse as parseCookie } from 'cookie'
 import Queue from './queue'
 import { v4 as uuid } from 'uuid'
-import { identify } from './wpcom'
+import { identify, identifyToken } from './wpcom'
 import { findOrCreateUser, getUser as getGroupsUser, createRoom, getRoom, joinRoom, memberDetails, recordRoomAction } from './groups'
 import { createHmac } from 'crypto'
 
@@ -205,36 +205,49 @@ export default function( server ) {
 	io.on( 'connection', ( socket ) => {
 		// If the user is an agent add the to the agent room
 		// TODO: authenticate agent
-		let user = { picture: 'http://1.gravatar.com/avatar/767fc9c115a1b989744c755db47feb60?s=200&r=pg&d=mm', name: 'Douglas Adams', id: 'sample' }
-		socket.emit( 'authorized', user )
-		socket.emit( 'chats', queue.openChats() )
-		socket.on( 'action', ( chatId, action, complete ) => {
-			debug( 'Received action', action )
-			let outbound = Object.assign( {}, action, {user, chat_id: chatId} )
-			io.of( '/chat' ).to( chatId ).emit( 'action', outbound )
-			io.to( chatId ).emit( 'action', outbound )
-			complete()
-		} )
-		socket.on( 'join-chat', ( id, fn ) => {
-			debug( 'join chat', id )
-			let chat = queue.join( socket, id, fn )
+		socket.emit( 'authorize' )
+		socket.on( 'authorize', ( access_token, complete ) => {
+			// fetch the user from wordpress.com
+			identifyToken( access_token )
+			.then( ( { avatar_URL, ID, display_name, username } ) => {
+				const user = {
+					picture: avatar_URL,
+					name: display_name,
+					id: ID,
+					username
+				}
+				complete( user )
+				socket.emit( 'chats', queue.openChats() )
+				socket.on( 'action', ( chatId, action, complete ) => {
+					debug( 'Received action', action )
+					let outbound = Object.assign( {}, action, {user, chat_id: chatId} )
+					io.of( '/chat' ).to( chatId ).emit( 'action', outbound )
+					io.to( chatId ).emit( 'action', outbound )
+					complete()
+				} )
+				socket.on( 'join-chat', ( id, fn ) => {
+					debug( 'join chat', id )
+					let chat = queue.join( socket, id, fn )
 
-			if ( !chat ) {
-				return debug( 'Failed to find chat', id )
-			}
+					if ( !chat ) {
+						return debug( 'Failed to find chat', id )
+					}
 
-			if ( socket.rooms[id] ) {
-				debug( 'already in room', id )
-				return
-			}
+					if ( socket.rooms[id] ) {
+						debug( 'already in room', id )
+						return
+					}
 
-			socket.join( id, ( e ) => {
-				if ( e ) return debug( 'Failed to join room', chat.id, id )
-				fn( chat.user )
-				let action = { type: 'join', user, chat_id: id }
-				io.of( '/chat' ).to( id ).emit( 'action', action )
-				io.to( id ).emit( 'action', action )
+					socket.join( id, ( e ) => {
+						if ( e ) return debug( 'Failed to join room', chat.id, id )
+						fn( chat.user )
+						let action = { type: 'join', user, chat_id: id }
+						io.of( '/chat' ).to( id ).emit( 'action', action )
+						io.to( id ).emit( 'action', action )
+					} )
+				} )
 			} )
+			.catch( ( e ) => debug( 'failed to authorize user', e ) )
 		} )
 	} )
 }

@@ -1,18 +1,23 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
-import Hud from './ui/hud'
 import configureStore from '../configure-store'
-import logger from 'debug'
 import { openRequest, closeRequest, receiveAction, setUser, setExistingQueue, setStatus } from './actions'
 import socket from './socket'
 import reducer from './reducers'
+import App, { haveToken, getToken } from './ui/app'
+import { when } from '../react-fn'
 
-const debug = logger( 'tardis.hud' )
+const debug = require( 'debug' )( 'tardis:hud' )
 const store = configureStore( reducer )
 
 const node = document.createElement( 'div' )
 document.body.appendChild( node )
+
+const authorize = when(
+	haveToken,
+	() => socket.emit( 'authorize', getToken(), ( user ) => store.dispatch( setUser( user ) ) )
+)
 
 socket.on( 'connect', () => {
 	debug( 'connected' )
@@ -35,6 +40,8 @@ socket.on( 'authorized', ( user ) => {
 	store.dispatch( setUser( user ) )
 } )
 
+socket.on( 'authorize', authorize )
+
 socket.on( 'chats', ( chats ) => {
 	store.dispatch( setExistingQueue( chats ) )
 } )
@@ -46,8 +53,7 @@ window.addEventListener( 'focus', () => {
 	store.dispatch( setStatus( false ) )
 } )
 if ( window.Notification ) {
-	Notification.requestPermission( ( permission ) => {
-	} )
+	Notification.requestPermission( () => {} )
 }
 
 store.dispatch( setStatus( !document.hasFocus() ) )
@@ -55,7 +61,7 @@ store.dispatch( setStatus( !document.hasFocus() ) )
 render(
 	<div className="container">
 		<Provider store={store}>
-			<Hud />
+			<App />
 		</Provider>
 	</div>,
 	node

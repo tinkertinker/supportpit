@@ -6,6 +6,7 @@ import admin from './src/admin'
 import chat from './src/chat'
 import teams, { withTeam } from './src/teams'
 import chatServer from './src/chat-server'
+import auth from './src/auth'
 
 const debug = logger( 'tardis.server' )
 const environment = process.env.NODE_ENV || 'development'
@@ -13,6 +14,8 @@ const environment = process.env.NODE_ENV || 'development'
 debug( 'Starting tardis in:', environment )
 
 let app = express()
+
+app.use( subdomain( 'auth', auth ) )
 
 app.use( subdomain( 'admin', admin ) )
 
