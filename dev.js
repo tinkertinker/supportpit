@@ -12,16 +12,18 @@ let app = express();
 let compiler = webpack( config );
 
 app.use( devMiddleware( compiler, {
-	publicPath: config.output.publicPath
+	publicPath: '/',
+	noInfo: false,
+	quiet: false
 } ) );
 
-app.use( hotMiddleware( compiler, { noInfo: true } ) );
+app.use( hotMiddleware( compiler ) );
 
 app.get( '*', ( req, res ) => {
 	let fs = compiler.outputFileSystem
 	res.set( 'Content-Type', 'text/html' );
 	const filePath = path.join( __dirname, 'dist', 'index.html' )
-	debug( 'Serving static file', filePath, fs.data )
+	debug( 'Serving static file', filePath )
 	res.send( compiler.outputFileSystem.readFileSync( filePath ) )
 } );
 
