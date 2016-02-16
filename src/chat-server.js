@@ -90,7 +90,7 @@ export default function( server ) {
 							user: Object.assign( {}, memberDetails( user ), { id: user.id } )
 						} )
 						recordRoomAction( room, userAction, ( e ) => {
-							if ( e ) return debug( "Failed to record action", e )
+							if ( e ) return debug( 'Failed to record action', e )
 							io.of( '/group' ).to( to ).emit( 'action', room_id, userAction )
 						} )
 					} )
@@ -165,6 +165,7 @@ export default function( server ) {
 		let token = parseToken( socket )
 
 		let onUser = ( user ) => {
+			debug( 'accepting user', user )
 			let chat = queue.open( socket, user )
 			socket.emit( 'init', chat.id, user )
 			socket.join( chat.id, () => {
@@ -192,10 +193,10 @@ export default function( server ) {
 			.catch( ( e ) => {
 				debug( 'User not found', e )
 				socket.emit( 'identify' )
-				socket.on( 'identify', ( name ) => {
-					onUser( { name, anonymous: true, id: uuid() } )
-				} )
-				// give the client a chance to enter user's info
+				// Anonymous user with a nickname
+				socket.on( 'identify', ( name ) => onUser( { name, anonymous: true, id: uuid() } ) )
+				// Accepting wpcom user data at face value
+				socket.on( 'user', ( user ) => onUser( user ) )
 			} )
 		} )
 		.catch( () => socket.emit( 'error', 'unknown-host' ) )
