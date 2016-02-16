@@ -31,5 +31,5 @@ Start up the server:
 npm start
 ```
 
-To see available chats open a team `/hud/` page (e.g. http://a8c.supportchat.localhost:3000/hud/)
-To start a chat open a team `/chat/` page (e.g. http://a8c.supportchat.localhost:3000/chat/)
+To see available chats open a team `/hud.html` page (e.g. http://a8c.supportchat.localhost:3000/hud.html)
+To start a chat open a team `/chat.html` page (e.g. http://a8c.supportchat.localhost:3000/chat.html)
