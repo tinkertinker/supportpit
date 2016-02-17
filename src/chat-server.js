@@ -7,8 +7,12 @@ import { v4 as uuid } from 'uuid'
 import { identify, identifyToken } from './wpcom'
 import { findOrCreateUser, getUser as getGroupsUser, createRoom, getRoom, joinRoom, memberDetails, recordRoomAction } from './groups'
 import { createHmac } from 'crypto'
+import { bot } from './bot'
+import { when } from './react-fn'
 
 const SECRET = process.env.SECRET || uuid()
+
+const bot_user = { name: 'Wapuu', username: 'wapuu', picture: 'https://wapuuclub.files.wordpress.com/2015/12/original_wapuu.png', id: 'wapuu' }
 
 let debug = logger( 'tardis.chat' )
 
@@ -69,6 +73,8 @@ function verify( signed, callback ) {
 		callback( null, value )
 	} )
 }
+
+const isMessage = ( { type } ) => type === 'message'
 
 export default function( server ) {
 	let io = socketio( server )
@@ -173,6 +179,16 @@ export default function( server ) {
 			} )
 			socket.on( 'action', ( action, fn ) => {
 				fn( 'received' )
+
+				when( isMessage, ( { message } ) => {
+					bot( { message, resolve: ( { message } ) => {
+						debug( 'Reply with', message )
+						let outbound = Object.assign( {}, { id: uuid(), type: 'message', message, chat_id: chat.id, user: bot_user } )
+						io.of( '/chat' ).to( chat.id ).emit( 'action', outbound )
+						io.to( chat.id ).emit( 'action', outbound )
+					} } )
+				} )( action )
+
 				debug( 'sending to', chat.id, action )
 				// Send the message to anyone in this chat
 				let outbound = Object.assign( {}, action, { user, chat_id: chat.id } )
