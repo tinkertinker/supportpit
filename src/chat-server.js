@@ -167,6 +167,22 @@ export default function( server ) {
 		} )
 	} )
 
+	const emitChat = ( { io, chat_id, action, params } ) => {
+		if ( !params ) params = []
+		io.of( '/chat' ).to( chat_id ).emit( action, ... params )
+		io.to( chat_id ).emit( action, ... params )
+	}
+
+	const emitAction = ( { io, chat_id, action } ) => {
+		debug( 'sending to', chat_id, action )
+		emitChat( { io, chat_id, action: 'action', params: [ action ] } )
+	}
+
+	const broadcastTyping = ( { io, chat_id, user } ) => {
+		debug( 'user is typing', user )
+		emitChat( { io, chat_id, action: 'typing', params: [ user, chat_id ] } )
+	}
+
 	io.of( '/chat' ).on( 'connection', ( socket ) => {
 		let token = parseToken( socket )
 
@@ -177,8 +193,11 @@ export default function( server ) {
 			socket.join( chat.id, () => {
 				debug( 'User has joined their support chat', chat.id )
 			} )
+			socket.on( 'typing', () => {
+				broadcastTyping( { io, chat_id: chat.id, user } )
+			} )
 			socket.on( 'action', ( action, fn ) => {
-				fn( 'received' )
+				if ( fn ) fn( 'received' )
 
 				when( isMessage, ( { message } ) => {
 					bot( { message, resolve: ( { message } ) => {
@@ -189,11 +208,8 @@ export default function( server ) {
 					} } )
 				} )( action )
 
-				debug( 'sending to', chat.id, action )
-				// Send the message to anyone in this chat
 				let outbound = Object.assign( {}, action, { user, chat_id: chat.id } )
-				io.of( '/chat' ).to( chat.id ).emit( 'action', outbound )
-				io.to( chat.id ).emit( 'action', outbound )
+				emitAction( { io, chat_id: chat.id, action: outbound } )
 			} )
 			io.emit( 'open-request', chat.asJSON() )
 			socket.on( 'disconnect', () => {
@@ -234,11 +250,13 @@ export default function( server ) {
 				}
 				complete( user )
 				socket.emit( 'chats', queue.openChats() )
+				socket.on( 'typing', ( chatId ) => {
+					broadcastTyping( { io, chat_id: chat.id, user } )
+				} )
 				socket.on( 'action', ( chatId, action, complete ) => {
 					debug( 'Received action', action )
 					let outbound = Object.assign( {}, action, {user, chat_id: chatId} )
-					io.of( '/chat' ).to( chatId ).emit( 'action', outbound )
-					io.to( chatId ).emit( 'action', outbound )
+					emitAction( { io, chat_id: chatId, action: outbound } )
 					complete()
 				} )
 				socket.on( 'join-chat', ( id, fn ) => {
