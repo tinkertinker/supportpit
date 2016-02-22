@@ -5,7 +5,7 @@ import { when } from '../../react-fn'
 
 import './chat.scss'
 
-const title = when( ( { title } ) => !isEmpty( title ), ( { title } ) => (
+const titleBar = when( ( { title } ) => !isEmpty( title ), ( { title } ) => (
 	<div className="title-bar">{ title }</div>
 ) )
 
@@ -65,6 +65,26 @@ export default class Chat extends Component {
 		}
 	}
 
+	renderTypers() {
+		const { typers } = this.props
+
+		if ( isEmpty( typers ) ) {
+			return
+		}
+
+		const [head, ... tail] = typers
+
+		// if there is no tail, then there was only one typer
+		if ( isEmpty( tail ) ) {
+			return <div className="typers"><strong>{ head.name }</strong> is typing.</div>
+		}
+
+		return <div className="typers">
+		{ tail.map( ( user ) => <span><strong>{user.name}</strong>,</span> ) }
+			and <strong>{head.name}</strong> are typing.
+		</div>
+	}
+
 	keyDown( e ) {
 		switch ( e.which ) {
 			case 13:
@@ -100,7 +120,7 @@ export default class Chat extends Component {
 		const buttonDisabled = !this.props.canSend
 		return (
 			<div className="chat">
-				{ title( { title: this.props.title } ) }
+				{ titleBar( { title: this.props.title } ) }
 				<div ref={( n ) => this.updateScrollOffset( n ) } className="log" onScroll={ this.onScrollLog.bind( this ) }>
 					<div className="messages">
 						{ this.props.actions.map( this.renderAction.bind( this ) ) }
@@ -109,6 +129,7 @@ export default class Chat extends Component {
 						{ this.props.pendingMessages.map( this.renderPendingMessage ) }
 					</div>
 				</div>
+				{ this.renderTypers() }
 				<div className="editor">
 					{ this.chatImage() }
 					<textarea value={this.props.message} onKeyDown={ this.keyDown.bind( this ) } onChange={ this.updateMessage.bind( this ) }/>

@@ -1,6 +1,19 @@
 import { combineReducers as combine } from 'redux'
-import { OPEN_REQUEST, CLOSE_REQUEST, RECEIVE_ACTION, OPEN_CHAT, EDIT_MESSAGE, CLEAR_MESSAGE, SET_USER, SET_EXISTING_QUEUE, SET_AWAY, SET_PRESENT } from './actions'
 import { omit } from 'lodash/object'
+import {
+	SET_USER_TYPING,
+	SET_USER_NOT_TYPING,
+	OPEN_REQUEST,
+	CLOSE_REQUEST,
+	RECEIVE_ACTION,
+	OPEN_CHAT,
+	EDIT_MESSAGE,
+	CLEAR_MESSAGE,
+	SET_USER,
+	SET_EXISTING_QUEUE,
+	SET_AWAY,
+	SET_PRESENT
+} from './actions'
 
 function online( state = [] ) {
 	return state
@@ -19,29 +32,42 @@ function availableChats( state = [], action ) {
 	}
 }
 
+const mapReplace = ( list, identify, replace ) =>
+	list.map( ( item ) => identify( item ) ? replace( item ) : item )
+
+const identifyChatByID = ( id ) => ( c ) => c.id === id
+const replaceChat = ( state, action ) => mapReplace(
+	state,
+	identifyChatByID( action.id ),
+	( existing ) => chat( existing, action )
+)
+
 function chats( state = [], action ) {
 	switch ( action.type ) {
 		case OPEN_CHAT:
 			return state.concat( chat( undefined, action ) )
 		case RECEIVE_ACTION:
-				// If we find an existing chat send the action to that chat, otherwise open a new chat
-			return state.map( ( existing ) => {
-				if ( existing.id !== action.id ) {
-					return existing
-				}
-				return chat( existing, action )
-			} )
+		case SET_USER_TYPING:
+		case SET_USER_NOT_TYPING:
+			return replaceChat( state, action )
 		default:
 			return state
 	}
 }
 
-function chat( state = { actions: [], user: {}, id: null }, action ) {
+function chat( state = { actions: [], user: {}, id: null, typers: [] }, action ) {
 	switch ( action.type ) {
 		case OPEN_CHAT:
 			return Object.assign( {}, state, { user: action.chat.user, id: action.chat.id } )
 		case RECEIVE_ACTION:
 			return Object.assign( {}, state, { actions: state.actions.concat( action.action ) } )
+		case SET_USER_TYPING:
+			return Object.assign( {}, state, { typers:
+				state.typers.find( ( { id } ) => id === action.user.id ) ? state.typers : state.typers.concat( action.user )
+			} )
+		case SET_USER_NOT_TYPING:
+			return Object.assign( {}, state, { typers: state.typers.filter( ( { id } ) => id !== action.user.id ) } )
+			return state
 		default:
 			return state
 	}

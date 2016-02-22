@@ -52,6 +52,7 @@ export class Hud extends Component {
 					message={message}
 					chat={this.props.chat}
 					canSend={canSend}
+					typers={chat.typers}
 					onUpdateMessage={this.updateMessage.bind( this, chat )}
 					onSendMessage={this.sendMessage.bind( this, chat )}
 					title={chat.user.name}

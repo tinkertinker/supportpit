@@ -1,7 +1,7 @@
 import socket from './socket'
 import logger from 'debug'
 import { v4 as uuid } from 'uuid'
-const debug = logger( 'tardis.actions' )
+const debug = logger( 'tardis:actions' )
 
 export const OPEN_REQUEST = 'OPEN_REQUEST'
 export function openRequest( chat ) {
@@ -112,4 +112,27 @@ export function setStatus( away = true ) {
 
 function now() {
 	return ( new Date() ).getTime()
+}
+
+const TIMERS = {}
+
+export function showTypingActivity( user, chat_id ) {
+	return ( dispatch ) => {
+		dispatch( setUserTyping( user, chat_id, true ) )
+
+		const timerId = [user, chat_id].join( '.' )
+		clearTimeout( TIMERS[timerId] )
+		TIMERS[timerId] = setTimeout( () => {
+			debug( 'user is no longer typing in this chat' )
+			delete TIMERS[timerId]
+			dispatch( setUserTyping( user, chat_id, false ) )
+		}, 1200 )
+	}
+}
+
+export const SET_USER_TYPING = 'SET_USER_TYPING'
+export const SET_USER_NOT_TYPING = 'SET_USER_NOT_TYPING'
+function setUserTyping( user, id, typing ) {
+	const type = typing ? SET_USER_TYPING : SET_USER_NOT_TYPING
+	return { type, user, id }
 }

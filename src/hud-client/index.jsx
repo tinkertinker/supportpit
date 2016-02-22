@@ -2,11 +2,19 @@ import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import configureStore from '../configure-store'
-import { openRequest, closeRequest, receiveAction, setUser, setExistingQueue, setStatus } from './actions'
 import socket from './socket'
 import reducer from './reducers'
 import App, { haveToken, getToken } from './ui/app'
 import { when } from '../react-fn'
+import {
+	showTypingActivity,
+	openRequest,
+	closeRequest,
+	receiveAction,
+	setUser,
+	setExistingQueue,
+	setStatus
+} from './actions'
 
 const debug = require( 'debug' )( 'tardis:hud' )
 const store = configureStore( reducer )
@@ -34,6 +42,10 @@ socket.on( 'close-request', ( chat ) => {
 socket.on( 'action', ( action ) => {
 	debug( 'Received action', action )
 	store.dispatch( receiveAction( action ) )
+} )
+
+socket.on( 'typing', ( user, chat_id ) => {
+	store.dispatch( showTypingActivity( user, chat_id ) )
 } )
 
 socket.on( 'authorized', ( user ) => {
