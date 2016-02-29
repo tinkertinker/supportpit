@@ -40,7 +40,6 @@ const hello = delayedMatch( /^hello$/i, ( { resolve } ) => {
 const yo = delayedMatch( /wapuu/i, ( { resolve } ) => resolve( { message: 'yo!' } ) )
 
 const detectors = any(
-	howdoi,
 	replyWithCount,
 	cheekyHelp,
 	getMeCoffee,
