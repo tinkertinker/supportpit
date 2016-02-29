@@ -183,6 +183,20 @@ export default function( server ) {
 		emitChat( { io, chat_id, action: 'typing', params: [ user, chat_id ] } )
 	}
 
+	const linkRegEx = /(https?:\/\/[^\s]+)/ig
+	const parseLinks = ( { message } ) => {
+		let links = [], match = null
+		do {
+			match = linkRegEx.exec( message )
+			if ( match ) {
+				let [, link] = match
+				debug( 'match?', match )
+				links = links.concat( [[ link, message.indexOf( link ), link.length ]] )
+			}
+		} while( match )
+		return links
+	}
+
 	io.of( '/chat' ).on( 'connection', ( socket ) => {
 		let token = parseToken( socket )
 
@@ -208,7 +222,12 @@ export default function( server ) {
 					} } )
 				} )( action )
 
-				let outbound = Object.assign( {}, action, { user, chat_id: chat.id } )
+				// identify urls and add them to the meta
+				const links = when( isMessage, parseLinks, () => null )( action )
+				debug( "received action:", action )
+				debug( 'message links', links )
+
+				let outbound = Object.assign( {}, action, { user, chat_id: chat.id, links } )
 				emitAction( { io, chat_id: chat.id, action: outbound } )
 			} )
 			io.emit( 'open-request', chat.asJSON() )
@@ -251,7 +270,7 @@ export default function( server ) {
 				complete( user )
 				socket.emit( 'chats', queue.openChats() )
 				socket.on( 'typing', ( chatId ) => {
-					broadcastTyping( { io, chat_id: chat.id, user } )
+					broadcastTyping( { io, chat_id: chatId, user } )
 				} )
 				socket.on( 'action', ( chatId, action, complete ) => {
 					debug( 'Received action', action )

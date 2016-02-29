@@ -37,14 +37,17 @@ const hello = delayedMatch( /^hello$/i, ( { resolve } ) => {
 		setTimeout( () => resolve( { message } ), i * 2000 + 400 )
 	} )
 } )
+const yo = delayedMatch( /wapuu/i, ( { resolve } ) => resolve( { message: 'yo!' } ) )
 
 const detectors = any(
+	howdoi,
 	replyWithCount,
 	cheekyHelp,
 	getMeCoffee,
 	reply,
 	hello,
 	dontKnow,
+	yo,
 	( { reject } ) => reject ? reject( new Error( 'Message not understood' ) ) : null
 )
 
